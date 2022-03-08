@@ -1,7 +1,13 @@
 package com.example.android.roomyweather.ui
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.android.roomyweather.R
 import com.example.android.roomyweather.data.ForecastPeriod
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.google.android.material.snackbar.Snackbar
 
 
 class ForecastListFragment : Fragment(R.layout.forecast_list), SharedPreferences.OnSharedPreferenceChangeListener {
@@ -108,6 +115,50 @@ class ForecastListFragment : Fragment(R.layout.forecast_list), SharedPreferences
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if(key == getString(R.string.pref_city_key)){
             onResume()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.forecast_list_fragment, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_map -> {
+                viewForecastCityOnMap()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    /**
+     * This method generates a geo URI to represent location of the city for which the forecast
+     * is being displayed and uses an implicit intent to view that location on a map.
+     */
+    private fun viewForecastCityOnMap() {
+        if (forecastAdapter.forecastCity != null) {
+            val geoUri = Uri.parse(getString(
+                R.string.geo_uri,
+                forecastAdapter.forecastCity?.lat ?: 0.0,
+                forecastAdapter.forecastCity?.lon ?: 0.0,
+                11
+            ))
+            val intent = Intent(Intent.ACTION_VIEW, geoUri)
+            try {
+                startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                /*
+                 * If there is no available app for viewing geo locations, display an error
+                 * message in a Snackbar.
+                 */
+                Snackbar.make(
+                    //findViewById(R.id.coordinator_layout),
+                    (activity as AppCompatActivity).findViewById(R.id.drawer_layout),
+                    R.string.action_map_error,
+                    Snackbar.LENGTH_LONG
+                ).show()
+            }
         }
     }
 }
