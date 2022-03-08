@@ -3,6 +3,18 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/drawable/ic_outline_cloud_28.xml" value="0.232" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/layout/activity_forecast_detail.xml" value="0.2898550724637681" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/layout/activity_main.xml" value="0.2898550724637681" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/layout/activity_settings.xml" value="0.2898550724637681" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/layout/cities_list_item.xml" value="0.1" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/layout/forecast_detail.xml" value="0.2898550724637681" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/layout/forecast_list.xml" value="0.2898550724637681" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/layout/forecast_list_item.xml" value="0.2898550724637681" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/menu/activity_forecast_detail.xml" value="0.31302083333333336" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/menu/activity_main.xml" value="0.23796296296296296" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/menu/main_nav_drawer.xml" value="0.31302083333333336" />
+        <entry key="..\:/Users/Jared/AndroidStudioProjects/assignment-4-Jared-Zielinski/app/src/main/res/xml/settings.xml" value="0.2898550724637681" />
         <entry key="app/src/main/res/layout/activity_forecast_detail.xml" value="0.10729166666666666" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.20833333333333334" />
         <entry key="app/src/main/res/layout/activity_settings.xml" value="0.1" />

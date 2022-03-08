@@ -1,16 +1,16 @@
 package com.example.android.roomyweather.ui
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import android.app.Application
+import androidx.lifecycle.*
 import com.example.android.roomyweather.api.OpenWeatherService
-import com.example.android.roomyweather.data.FiveDayForecast
-import com.example.android.roomyweather.data.FiveDayForecastRepository
+import com.example.android.roomyweather.data.*
 import kotlinx.coroutines.launch
 
-class FiveDayForecastViewModel : ViewModel() {
+class FiveDayForecastViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = FiveDayForecastRepository(OpenWeatherService.create())
+    private val citiesRepo = CitiesRepository(
+        AppDatabase.getInstance(application).searchedCityDao()
+    )
 
     /*
      * These fields hold the five-day forecast data displayed by the UI.
@@ -43,6 +43,10 @@ class FiveDayForecastViewModel : ViewModel() {
     fun loadFiveDayForecast(city: String?, units: String?, apiKey: String) {
         viewModelScope.launch {
             _loading.value = true
+            if(!city.isNullOrBlank()){
+                val cityEntry = SearchedCityEntry(city,System.currentTimeMillis())
+                citiesRepo.insertCity(cityEntry)
+            }
             val result = repository.loadFiveDayForecast(city, units, apiKey)
             _loading.value = false
             _error.value = result.exceptionOrNull()

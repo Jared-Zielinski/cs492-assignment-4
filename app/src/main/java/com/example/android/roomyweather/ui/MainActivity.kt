@@ -1,23 +1,30 @@
 package com.example.android.roomyweather.ui
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import android.util.Log
 import android.view.View
-import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.example.android.roomyweather.BuildConfig
+import com.example.android.roomyweather.R
+import com.google.android.material.navigation.NavigationView
+import androidx.navigation.findNavController
+import androidx.navigation.ui.navigateUp
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.android.roomyweather.BuildConfig
-import com.example.android.roomyweather.R
-import com.example.android.roomyweather.data.*
-import com.google.android.material.progressindicator.CircularProgressIndicator
-import com.google.android.material.snackbar.Snackbar
+import com.example.android.roomyweather.data.AppDatabase
+import com.example.android.roomyweather.data.CitiesRepository
+import com.example.android.roomyweather.data.SearchedCityEntry
 
 /*
  * To use your own OpenWeather API key, create a file called `gradle.properties` in your
@@ -41,136 +48,72 @@ const val OPENWEATHER_APPID = BuildConfig.OPENWEATHER_API_KEY
 class MainActivity : AppCompatActivity() {
     private val tag = "MainActivity"
 
-    private val viewModel: FiveDayForecastViewModel by viewModels()
+    private lateinit var appBarConfiguration: AppBarConfiguration
 
-    private lateinit var forecastAdapter: ForecastAdapter
+    private val citiesViewModel: BookmarkedCitiesViewModel by viewModels()
+    private lateinit var citiesListRV: RecyclerView
+    private val cityListAdapter = BookmarkedCityListAdapter(::onCityClick)
+//    private lateinit var drawerLayout: DrawerLayout
 
-    private lateinit var forecastListRV: RecyclerView
-    private lateinit var loadingErrorTV: TextView
-    private lateinit var loadingIndicator: CircularProgressIndicator
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        loadingErrorTV = findViewById(R.id.tv_loading_error)
-        loadingIndicator = findViewById(R.id.loading_indicator)
-        forecastListRV = findViewById(R.id.rv_forecast_list)
+//        citiesRepo = CitiesRepository(
+//            AppDatabase.getInstance(application).searchedCityDao()
+//        )
+        citiesListRV = findViewById(R.id.rv_city_list)
+        citiesListRV.layoutManager = LinearLayoutManager(this)
+        citiesListRV.setHasFixedSize(true)
+        citiesListRV.adapter = cityListAdapter
+        citiesListRV.visibility = View.VISIBLE
+        citiesListRV.scrollToPosition(0)
 
-        forecastAdapter = ForecastAdapter(::onForecastItemClick)
 
-        forecastListRV.layoutManager = LinearLayoutManager(this)
-        forecastListRV.setHasFixedSize(true)
-        forecastListRV.adapter = forecastAdapter
+        //Create the toolbar found at the top of the screen
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
-        /*
-         * Observe forecast data.  Whenever forecast data changes, display it in the RecyclerView.
-         */
-        viewModel.forecast.observe(this) { forecast ->
-            if (forecast != null) {
-                forecastAdapter.updateForecast(forecast)
-                forecastListRV.visibility = View.VISIBLE
-                forecastListRV.scrollToPosition(0)
-                supportActionBar?.title = forecast.city.name
-            }
+        //navHostFragment is the fragment that will contain our other fragments
+        val navHostFragment: NavHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        //navController controls which fragment will populate the navHostFragment
+        val navController = navHostFragment.navController
+
+        //Layout for the nav drawer
+        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
+        //Use the nav graph and drawer layout to manage the toolbar and create the nav drawer
+        appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        findViewById<NavigationView>(R.id.nav_view).setupWithNavController(navController)
+
+        citiesViewModel.loadBookmarkedCities()
+        citiesViewModel.cities.observe(this) { cities ->
+            cityListAdapter.updateCitylist(cities)
         }
 
-        /*
-         * Observe error message.  If an error message is present, display it.
-         */
-        viewModel.error.observe(this) { error ->
-            if (error != null) {
-                loadingErrorTV.text = getString(R.string.loading_error, error.message)
-                loadingErrorTV.visibility = View.VISIBLE
-            }
-        }
 
-        /*
-         * Observe loading indicator.  When loading, display progress indicator and hide other
-         * UI elements.
-         */
-        viewModel.loading.observe(this) { loading ->
-            if (loading) {
-                loadingIndicator.visibility = View.VISIBLE
-                loadingErrorTV.visibility = View.INVISIBLE
-                forecastListRV.visibility = View.INVISIBLE
-            } else {
-                loadingIndicator.visibility = View.INVISIBLE
-            }
-        }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment)
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
 
-        /*
-         * Here, we're reading the current preference values and triggering a data fetching
-         * operation in onResume().  This avoids the need to set up a preference change listener.
-         * It also means that a new API call could potentially be made every time the activity
-         * is resumed.  However, because of the basic caching that's implemented in the
-         * FiveDayForecastRepository class, an API call will actually only be made whenever
-         * the city or units setting changes (which is exactly what we want).
-         */
+    private fun onCityClick(clickedCity: SearchedCityEntry){
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val city = sharedPrefs.getString(getString(R.string.pref_city_key), "Corvallis,OR,US")
-        val units = sharedPrefs.getString(getString(R.string.pref_units_key), null)
-        viewModel.loadFiveDayForecast(city, units, OPENWEATHER_APPID)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.activity_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_map -> {
-                viewForecastCityOnMap()
-                true
-            }
-            R.id.action_settings -> {
-                val intent = Intent(this, SettingsActivity::class.java)
-                startActivity(intent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+        with (sharedPrefs.edit()) {
+            putString(getString(R.string.pref_city_key), clickedCity.location)
+            apply()
         }
-    }
 
-    private fun onForecastItemClick(forecastPeriod: ForecastPeriod) {
-        val intent = Intent(this, ForecastDetailActivity::class.java).apply {
-            putExtra(EXTRA_FORECAST_PERIOD, forecastPeriod)
-            putExtra(EXTRA_FORECAST_CITY, forecastAdapter.forecastCity)
-        }
-        startActivity(intent)
-    }
+        findViewById<DrawerLayout>(R.id.drawer_layout).closeDrawers()
 
-    /**
-     * This method generates a geo URI to represent location of the city for which the forecast
-     * is being displayed and uses an implicit intent to view that location on a map.
-     */
-    private fun viewForecastCityOnMap() {
-        if (forecastAdapter.forecastCity != null) {
-            val geoUri = Uri.parse(getString(
-                R.string.geo_uri,
-                forecastAdapter.forecastCity?.lat ?: 0.0,
-                forecastAdapter.forecastCity?.lon ?: 0.0,
-                11
-            ))
-            val intent = Intent(Intent.ACTION_VIEW, geoUri)
-            try {
-                startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                /*
-                 * If there is no available app for viewing geo locations, display an error
-                 * message in a Snackbar.
-                 */
-                Snackbar.make(
-                    findViewById(R.id.coordinator_layout),
-                    R.string.action_map_error,
-                    Snackbar.LENGTH_LONG
-                ).show()
-            }
-        }
+        val fiveDayForecastViewModel: FiveDayForecastViewModel by viewModels()
+        fiveDayForecastViewModel.loadFiveDayForecast(
+            clickedCity.location,
+            sharedPrefs.getString(getString(R.string.pref_units_key), getString(R.string.pref_units_default_value)),
+            OPENWEATHER_APPID)
     }
 }

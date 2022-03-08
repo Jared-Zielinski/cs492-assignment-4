@@ -12,20 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CS492Weather">
         <activity
-            android:name=".ui.SettingsActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.MainActivity"/>
-        <activity
-            android:name=".ui.ForecastDetailActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.MainActivity" />
-        <activity
             android:name=".ui.MainActivity"
             android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
