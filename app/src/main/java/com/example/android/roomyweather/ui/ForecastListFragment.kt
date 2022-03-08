@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -34,6 +35,7 @@ class ForecastListFragment : Fragment(R.layout.forecast_list), SharedPreferences
         forecastListRV.layoutManager = LinearLayoutManager(requireContext())
         forecastListRV.setHasFixedSize(true)
         forecastListRV.adapter = forecastAdapter
+        setHasOptionsMenu(true)
 
         /*
          * Observe forecast data.  Whenever forecast data changes, display it in the RecyclerView.
@@ -43,7 +45,8 @@ class ForecastListFragment : Fragment(R.layout.forecast_list), SharedPreferences
                 forecastAdapter.updateForecast(forecast)
                 forecastListRV.visibility = View.VISIBLE
                 forecastListRV.scrollToPosition(0)
-                //supportActionBar?.title = forecast.city.name
+
+                (activity as AppCompatActivity).title = forecast.city.name
             }
         }
 

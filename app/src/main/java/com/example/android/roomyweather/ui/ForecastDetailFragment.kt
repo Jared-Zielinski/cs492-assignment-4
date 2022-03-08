@@ -10,7 +10,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
 import com.bumptech.glide.Glide
@@ -51,6 +50,8 @@ class ForecastDetailFragment : Fragment(R.layout.forecast_detail) {
         Glide.with(this)
             .load(forecastPeriod!!.iconUrl)
             .into(view.findViewById(R.id.iv_forecast_icon))
+
+        view.findViewById<TextView>(R.id.tv_forecast_city).text = forecastCity!!.name
 
         view.findViewById<TextView>(R.id.tv_forecast_date).text = getString(
             R.string.forecast_date_time,

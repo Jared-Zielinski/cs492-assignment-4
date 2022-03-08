@@ -53,16 +53,12 @@ class MainActivity : AppCompatActivity() {
     private val citiesViewModel: BookmarkedCitiesViewModel by viewModels()
     private lateinit var citiesListRV: RecyclerView
     private val cityListAdapter = BookmarkedCityListAdapter(::onCityClick)
-//    private lateinit var drawerLayout: DrawerLayout
 
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        citiesRepo = CitiesRepository(
-//            AppDatabase.getInstance(application).searchedCityDao()
-//        )
         citiesListRV = findViewById(R.id.rv_city_list)
         citiesListRV.layoutManager = LinearLayoutManager(this)
         citiesListRV.setHasFixedSize(true)
@@ -92,8 +88,6 @@ class MainActivity : AppCompatActivity() {
         citiesViewModel.cities.observe(this) { cities ->
             cityListAdapter.updateCitylist(cities)
         }
-
-
     }
 
     override fun onSupportNavigateUp(): Boolean {
