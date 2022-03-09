@@ -1,9 +1,12 @@
 package com.example.android.roomyweather.ui
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
+import com.example.android.roomyweather.R
 import com.example.android.roomyweather.api.OpenWeatherService
 import com.example.android.roomyweather.data.*
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
 class FiveDayForecastViewModel(application: Application) : AndroidViewModel(application) {
@@ -41,16 +44,19 @@ class FiveDayForecastViewModel(application: Application) : AndroidViewModel(appl
      * @param apiKey A valid OpenWeather API key.
      */
     fun loadFiveDayForecast(city: String?, units: String?, apiKey: String) {
-        viewModelScope.launch {
-            _loading.value = true
-            if(!city.isNullOrBlank()){
-                val cityEntry = SearchedCityEntry(city,System.currentTimeMillis())
+        val regex = Regex("([\\w-]+,){1,2}[\\w-]+")
+        if(city.isNullOrBlank() || !regex.matches(city)){
+            throw Exception(city)
+        } else {
+            viewModelScope.launch {
+                _loading.value = true
+                val cityEntry = SearchedCityEntry(city, System.currentTimeMillis())
                 citiesRepo.insertCity(cityEntry)
+                val result = repository.loadFiveDayForecast(city, units, apiKey)
+                _loading.value = false
+                _error.value = result.exceptionOrNull()
+                _forecast.value = result.getOrNull()
             }
-            val result = repository.loadFiveDayForecast(city, units, apiKey)
-            _loading.value = false
-            _error.value = result.exceptionOrNull()
-            _forecast.value = result.getOrNull()
         }
     }
 }

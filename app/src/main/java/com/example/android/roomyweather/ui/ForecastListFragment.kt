@@ -21,6 +21,7 @@ import com.example.android.roomyweather.R
 import com.example.android.roomyweather.data.ForecastPeriod
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.snackbar.Snackbar
+import kotlin.Exception
 
 
 class ForecastListFragment : Fragment(R.layout.forecast_list), SharedPreferences.OnSharedPreferenceChangeListener {
@@ -98,7 +99,16 @@ class ForecastListFragment : Fragment(R.layout.forecast_list), SharedPreferences
         val city = sharedPrefs.getString(getString(R.string.pref_city_key), "Corvallis,OR,US")
         val units = sharedPrefs.getString(getString(R.string.pref_units_key), null)
 
-        viewModel.loadFiveDayForecast(city, units, OPENWEATHER_APPID)
+        try {
+            viewModel.loadFiveDayForecast(city, units, OPENWEATHER_APPID)
+        }catch (e: Exception){
+            Snackbar.make(
+                (activity as AppCompatActivity).findViewById(R.id.drawer_layout),
+                getString(R.string.city_format_error,city),
+                Snackbar.LENGTH_LONG
+            ).show()
+        }
+
     }
 
     override fun onPause() {
@@ -153,7 +163,6 @@ class ForecastListFragment : Fragment(R.layout.forecast_list), SharedPreferences
                  * message in a Snackbar.
                  */
                 Snackbar.make(
-                    //findViewById(R.id.coordinator_layout),
                     (activity as AppCompatActivity).findViewById(R.id.drawer_layout),
                     R.string.action_map_error,
                     Snackbar.LENGTH_LONG

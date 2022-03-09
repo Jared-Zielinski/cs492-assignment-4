@@ -1,5 +1,6 @@
 package com.example.android.roomyweather.ui
 
+import android.content.ClipData
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -83,6 +85,12 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         findViewById<NavigationView>(R.id.nav_view).setupWithNavController(navController)
+
+//        findViewById<NavigationView>(R.id.nav_view).setOnClickListener {
+//            findViewById<DrawerLayout>(R.id.drawer_layout).closeDrawers()
+//        }
+
+
 
         citiesViewModel.loadBookmarkedCities()
         citiesViewModel.cities.observe(this) { cities ->

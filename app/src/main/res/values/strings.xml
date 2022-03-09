@@ -47,4 +47,6 @@
     <string name="imperial_wind_display">mph</string>
     <string name="label_settings">Settings</string>
     <string name="current_forecast_title">Current Forecast</string>
+
+    <string name="city_format_error">Please enter a city name of the format "city,state,country" or "city,state". You entered %1$s</string>
 </resources>
